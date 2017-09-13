@@ -31,7 +31,7 @@
     "drupal/core": "^8",
     "drush/drush": "~8",
     "rvtraveller/qs-composer-installer": "^1.1",
-    "ucdavis/sitefarm": "dev-8.x-1.x",
+    "ucdavis/sitefarm": "dev-8.x-2.x",
     "webflo/drupal-core-strict": "^8"
   },
   "require-dev": {
