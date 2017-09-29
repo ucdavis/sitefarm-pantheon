@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+
+if [ ${#PANTHEON_TOKEN} -eq 0 ]; then
+echo "Please enter your PANTHEON_TOKEN in the docksal-local.env file." ; exit
+fi

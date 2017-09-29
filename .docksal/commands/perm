@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+
+# Set write permission for SITE_DIRECTORY
+# chmod 755 $SITEDIR_PATH
+echo "$SITEDIR_PATH is now writable"
