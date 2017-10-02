@@ -18,10 +18,10 @@ while getopts 'dfcs:e:' flag; do
     e)
       PANTHEON_ENV=${OPTARG}
       ;;
-    f)
+    d)
       FILES=false
       ;;
-    d)
+    f)
       DATABASE=false
       ;;
   esac
@@ -61,7 +61,10 @@ if $UPDATECOMPOSER ; then
     fin exec composer -n global require -n "hirak/prestissimo:^0.3"
     fin exec composer -n global require -n "pantheon-systems/terminus:~1"
     fin exec "mkdir -p ~/.terminus/plugins"
-    fin exec "composer create-project --no-dev -d ~/.terminus/plugins pantheon-systems/terminus-rsync-plugin:~1"
+    RSYNC=$(fin exec "find ~/.terminus/plugins -name terminus-rsync-plugin")
+    if [ ${#RSYNC} -eq 0 ] ; then
+        fin exec "composer create-project --no-dev -d ~/.terminus/plugins pantheon-systems/terminus-rsync-plugin:~1"
+    fi
     fin exec "composer update -d ~/.terminus/plugins/terminus-rsync-plugin"
 
     # Remove old directories and install
@@ -71,11 +74,12 @@ if $UPDATECOMPOSER ; then
     echo "Deleted: $DOCROOT_PATH/core"
     rm -rf $DOCROOT_PATH/modules/contrib
     echo "Deleted: $DOCROOT_PATH/modules/contrib"
-    fin exec composer install
+    fin exec "composer install"
 fi
 
 # Log into Terminus
 fin exec terminus auth:login --machine-token=$PANTHEON_TOKEN
+fin exec terminus env:wake ${PANTHEON_SITE}.${PANTHEON_ENV}
 
 # Set permissions
 sudo chmod 755 $SITEDIR_PATH
@@ -98,6 +102,7 @@ echo "
 " >> $SITEDIR_PATH/settings.local.php
 
 # Set hosts
+echo "Setting hosts..."
 fin hosts remove $VIRTUAL_HOST
 fin hosts add $VIRTUAL_HOST
 
@@ -114,24 +119,26 @@ fi
 ## Install site
 if $DATABASE; then
   DBFILE="/tmp/${PANTHEON_SITE}.sql"
+  fin exec "rm -rf $DBFILE"
   if [ ! -f $DBFILE ] || [ ! -z $(find $DBFILE -mmin +60) ] ; then
-     echo "$somefile need updating"
-
-      echo 'Exporting latest database...'
+    echo "$DBFILE needs updating."
+    echo 'Exporting latest database...'
       if [ -f $DBFILE ] && [ ! -z $(find $DBFILE -mmin +60) ]; then
-        rm -rf $DBFILE
+        fin exec "rm -rf $DBFILE"
       fi
-
-      DBCONN=$(fin exec terminus connection:info ${PANTHEON_SITE}.${PANTHEON_ENV} --field="MySQL Command");
-      DBDUMP=${DBCONN/mysql /mysqldump }
-      eval $DBDUMP " --result-file=${DBFILE}"
-      fin db import $DBFILE
+      DBCONN=$(fin exec "terminus connection:info $PANTHEON_SITE.$PANTHEON_ENV --field='MySQL Command'");
+      DBCONN=${DBCONN//$'\r'/}
+      DBDUMP="${DBCONN/mysql /mysqldump } --result-file=$DBFILE"
+      fin exec "$DBDUMP"
+      echo 'Importing database...'
+      fin exec "cat $DBFILE" | fin db import
   else
-      fin db import $DBFILE
+      fin exec "cat $DBFILE" | fin db import
   fi
 fi
 
 # Run update.php
+echo 'Running Drupal updates...'
 fin drush cr
 fin drush updb -y
 
