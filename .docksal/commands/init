@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+
+# Abort if anything fails
+# set -e
+
+UPDATECOMPOSER=false
+DATABASE=true
+FILES=true
+
+while getopts 'dfcs:e:' flag; do
+  case $flag in
+    c)
+      UPDATECOMPOSER=true
+      ;;
+    s)
+      PANTHEON_SITE=${OPTARG}
+      ;;
+    e)
+      PANTHEON_ENV=${OPTARG}
+      ;;
+    d)
+      FILES=false
+      ;;
+    f)
+      DATABASE=false
+      ;;
+  esac
+done
+
+#-------------------------- Settings --------------------------------
+
+# PROJECT_ROOT is passed from fin.
+# The following variables are configured in the '.env' file: DOCROOT, VIRTUAL_HOST.
+
+SITE_DIRECTORY=${SITE_DIRECTORY:-default}
+DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
+SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
+
+#-------------------------- END: Settings --------------------------------
+
+cd $PROJECT_ROOT
+
+# Start containers
+fin up
+
+# Check to see if docksal-local.env exists, and that $PANTHEON_TOKEN is available
+if [[ ! -f "$PROJECT_ROOT/.docksal/docksal-local.env" ]]; then
+	echo "Could not find docksal-local.env. Creating..."
+	cp $PROJECT_ROOT/.docksal/example.docksal-local.env $PROJECT_ROOT/.docksal/docksal-local.env
+fi
+
+if [ ${#PANTHEON_TOKEN} -eq 0 ]; then
+echo "Please enter your PANTHEON_TOKEN in the docksal-local.env file." ; exit
+fi
+
+if [ ${#PANTHEON_SITE} -eq 0 ]; then
+echo "Please enter your PANTHEON_SITE in the docksal-local.env file." ; exit
+fi
+
+if $UPDATECOMPOSER ; then
+    fin exec composer -n global require -n "hirak/prestissimo:^0.3"
+    fin exec composer -n global require -n "pantheon-systems/terminus:~1"
+    fin exec "mkdir -p ~/.terminus/plugins"
+    RSYNC=$(fin exec "find ~/.terminus/plugins -name terminus-rsync-plugin")
+    if [ ${#RSYNC} -eq 0 ] ; then
+        fin exec "composer create-project --no-dev -d ~/.terminus/plugins pantheon-systems/terminus-rsync-plugin:~1"
+    fi
+    fin exec "composer update -d ~/.terminus/plugins/terminus-rsync-plugin"
+
+    # Remove old directories and install
+    rm -rf $PROJECT_ROOT/vendor
+    echo "Deleted: $PROJECT_ROOT/vendor"
+    rm -rf $DOCROOT_PATH/core
+    echo "Deleted: $DOCROOT_PATH/core"
+    rm -rf $DOCROOT_PATH/modules/contrib
+    echo "Deleted: $DOCROOT_PATH/modules/contrib"
+    fin exec "composer install"
+fi
+
+# Log into Terminus
+fin exec terminus auth:login --machine-token=$PANTHEON_TOKEN
+fin exec terminus env:wake ${PANTHEON_SITE}.${PANTHEON_ENV}
+
+# Set permissions
+echo "Setting $SITEDIR_PATH permissions..."
+sudo chmod 755 $SITEDIR_PATH
+# Set local config files
+cp $SITEDIR_PATH/default.settings.local.php $SITEDIR_PATH/settings.local.php
+cp $SITEDIR_PATH/default.services.local.yml $SITEDIR_PATH/services.local.yml
+
+# Set extra config
+echo "
+\$databases['default']['default'] = array (
+  'database' => 'default',
+  'username' => 'user',
+  'password' => 'user',
+  'prefix' => '',
+  'host' => '$(fin vm ip)',
+  'port' => '${MYSQL_PORT_MAPPING%%:*}',
+  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+  'driver' => 'mysql',
+);
+" >> $SITEDIR_PATH/settings.local.php
+
+# Set hosts
+echo "Setting hosts..."
+fin hosts remove $VIRTUAL_HOST
+fin hosts add $VIRTUAL_HOST
+
+cd $SITEDIR_PATH
+
+if $FILES; then
+  echo "Downloading latest set of files from ${PANTHEON_SITE}.${PANTHEON_ENV}..."
+  fin exec "terminus rsync ${PANTHEON_SITE}.${PANTHEON_ENV}:files . "
+
+  echo "Fixing files directory permissions..."
+  chmod -R 755 files
+fi
+
+## Install site
+if $DATABASE; then
+  DBFILE="/tmp/${PANTHEON_SITE}.sql"
+  fin exec "rm -rf $DBFILE"
+  if [ ! -f $DBFILE ] || [ ! -z $(find $DBFILE -mmin +60) ] ; then
+    echo "$DBFILE needs updating."
+    echo 'Exporting latest database...'
+      if [ -f $DBFILE ] && [ ! -z $(find $DBFILE -mmin +60) ]; then
+        fin exec "rm -rf $DBFILE"
+      fi
+      DBCONN=$(fin exec "terminus connection:info $PANTHEON_SITE.$PANTHEON_ENV --field='MySQL Command'");
+      DBCONN=${DBCONN//$'\r'/}
+      DBDUMP="${DBCONN/mysql /mysqldump } --result-file=$DBFILE"
+      fin exec "$DBDUMP"
+      echo 'Importing database...'
+      fin exec "cat $DBFILE" | fin db import
+  else
+      fin exec "cat $DBFILE" | fin db import
+  fi
+fi
+
+# Run update.php
+echo 'Running Drupal updates...'
+fin drush cr
+fin drush updb -y
+
+# Sanitize the DB
+fin drush sql-sanitize -y
+
+# Set Docksal Solr Server
+fin drush sql-query "UPDATE search_api_server SET options=REPLACE(options, 's:9:\"localhost\"', 's:4:\"solr\"') WHERE machine_name='solr_server'"
+
+cd ${DOCROOT_PATH}
+
+# Set permissions
+sudo chmod 755 $SITEDIR_PATH
+
+echo "To reindex Solr, run: fin drush search-api-reindex ; fin drush search-api-index"
+
+# Get login link
+echo "Access site here: "
+fin drush uli --uri="http://$VIRTUAL_HOST"
