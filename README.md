@@ -41,6 +41,19 @@ $ terminus build:project:create --stability=dev --team="University of California
 
 Replace "my-sitefarm-site" would your desired site machine name in Pantheon.
 
+Once the build is completed, log into CircleCI and add the CircleCI Private SSH Key 
+to your new project so that it can access the private repos on Bitbucket.
+
+1. On your new project's GitHub page, click on the `circleci|failed` icon.
+2. Now, on your new project's CircleCI project listing, click on the settings cog.
+3. Go to "SSH Permissions", then "Add SSH Key".
+* Hostname: `bitbucket.org`
+* Private Key: [copy/paste private key from Confluence]
+
+Finally, click "rebuild" on the first failed CircleCI build to complete the install.
+
+Now, you can clone down the GitHub repo and begin work.
+
 
 ## Important files and directories
 
