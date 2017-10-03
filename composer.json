@@ -12,6 +12,10 @@
       "type": "vcs",
       "url": "git@bitbucket.org:ietwebdev/sitefarm.git"
     },
+    "ucdavis/sitefarm_one": {
+      "type": "vcs",
+      "url": "git@bitbucket.org:ietwebdev/sitefarm-theme-one.git"
+    },
     "ucdavis/aggiefeed": {
       "type": "vcs",
       "url": "git@bitbucket.org:ietwebdev/aggiefeed-drupal-module.git"
@@ -32,6 +36,7 @@
     "drush/drush": "~8",
     "rvtraveller/qs-composer-installer": "^1.1",
     "ucdavis/sitefarm": "dev-8.x-2.x",
+    "ucdavis/sitefarm_one": "dev-8.x-2.x",
     "webflo/drupal-core-strict": "^8"
   },
   "require-dev": {
