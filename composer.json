@@ -12,10 +12,6 @@
       "type": "vcs",
       "url": "git@bitbucket.org:ietwebdev/sitefarm.git"
     },
-    "ucdavis/sitefarm_one": {
-      "type": "vcs",
-      "url": "git@bitbucket.org:ietwebdev/sitefarm-theme-one.git"
-    },
     "ucdavis/aggiefeed": {
       "type": "vcs",
       "url": "git@bitbucket.org:ietwebdev/aggiefeed-drupal-module.git"
