@@ -32,6 +32,7 @@
     "drush/drush": "~8",
     "rvtraveller/qs-composer-installer": "^1.1",
     "ucdavis/sitefarm": "dev-8.x-2.x",
+    "ucdavis/sitefarm_one": "dev-8.x-2.x",
     "webflo/drupal-core-strict": "^8"
   },
   "require-dev": {
@@ -63,7 +64,9 @@
       "@prepare-for-pantheon",
       "composer install --optimize-autoloader"
     ],
-    "drupal-unit-tests": "cd web/core && ../../vendor/bin/phpunit --testsuite=unit --exclude-group Composer,DependencyInjection,PageCache",
+    "lint": "find web/modules/custom web/themes/custom -name '*.php' -exec php -l {} \\;",
+    "code-sniff": "echo 'No code sniff step defined.'",
+    "unit-test": "echo 'No unit test step defined.'",
     "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
     "prepare-for-pantheon": "DrupalProject\\composer\\ScriptHandler::prepareForPantheon",
     "post-install-cmd": [
@@ -116,6 +119,9 @@
   "config": {
     "optimize-autoloader": true,
     "preferred-install": "dist",
-    "sort-packages": true
+    "sort-packages": true,
+    "platform": {
+      "php": "7.0"
+    }
   }
 }
