@@ -10,7 +10,7 @@
     },
     "ucdavis/sitefarm": {
       "type": "vcs",
-      "url": "git@bitbucket.org:ietwebdev/sitefarm.git"
+      "url": "git@github.com:ucdavis/sitefarm_seed.git"
     },
     "ucdavis/aggiefeed": {
       "type": "vcs",
