@@ -43,6 +43,19 @@ services:
       - project_root:/var/www:rw,nocopy  # Project root volume
       - ${PROJECT_ROOT}/.docksal/etc/drush:/etc/drush:ro
 
+  # Varnish
+  varnish:
+    extends:
+      file: ${HOME}/.docksal/stacks/services.yml
+      service: varnish
+    depends_on:
+      - web
+
+# Solr
+  solr:
+    hostname: solr
+    image: docksal/solr:1.0-solr3
+
   # Browser
   browser:
     hostname: browser
