@@ -48,7 +48,7 @@ Feature: Content
 #    Then I should see the heading "My article with fields!"
 #    And I should see the text "A placeholder"
 
-  @api
+  @api @local
   Scenario: Create users
     Given users:
     | name     | mail            | status | roles |

@@ -40,20 +40,20 @@ for i in "$@"; do
 	esac;
 done
 
-behat_yml_path="${PROJECT_ROOT}/${path}/${file}"
+BEHAT_PATH="${PROJECT_ROOT}/${path}"
+BEHAT_YML_PATH="${BEHAT_PATH}/${file}"
 
-if [[ ! -f "${behat_yml_path}" ]]; then
-	echo "Could not find ${behat_yml_path}"
-	exit 1
+if [[ ! -f "$BEHAT_YML_PATH" ]]; then
+	echo "Could not find behat.yml. Creating..."
+	cp $BEHAT_PATH/behat.template.yml $BEHAT_PATH/behat.yml
 fi
 
-if ${VNC_PORT_MAPPING%\:5900*}; then
+if [[ ${VNC_PORT_MAPPING%\:5900*} > 0 ]]; then
     # Launch VNC viewer
     VNC_URL="vnc://:secret@${VIRTUAL_HOST}:${VNC_PORT_MAPPING%\:5900*}"
-    echo "VNC URL: ${VIRTUAL_HOST}:${VNC_PORT_MAPPING%\:5900*}"
-    echo "Password: secret"
-    # open "$VNC_URL"
+    echo "Open $VNC_URL"
+    #open "$VNC_URL"
 fi
 
 # Launch Behat tests
-cd ${PROJECT_ROOT}/${path} && /var/www/vendor/bin/behat --tags="~@ignore" --config ${behat_yml_path} -p ${profile} ${params}
+cd ${PROJECT_ROOT}/${path} && ${PROJECT_ROOT}/vendor/bin/behat --tags="~@ignore" --config ${BEHAT_YML_PATH} -p ${profile} ${params}

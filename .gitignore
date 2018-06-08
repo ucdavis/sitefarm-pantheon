@@ -67,6 +67,7 @@ web/sites/simpletest
 
 # Ignore Docksal local stuff
 docksal-local.env
+tests/behat.yml
 
 # Packages #
 ############

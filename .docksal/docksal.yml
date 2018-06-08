@@ -38,6 +38,7 @@ services:
       - TERMINUS_TOKEN
       - VIRTUAL_HOST
       - MYSQL_PORT
+      - VNC_PORT_MAPPING
     volumes:
       - project_root:/var/www:rw,nocopy  # Project root volume
       - ${PROJECT_ROOT}/.docksal/etc/drush:/etc/drush:ro
