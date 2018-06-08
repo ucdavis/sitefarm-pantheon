@@ -36,7 +36,7 @@ export CIRCLE_TOKEN=[REDACTED]
 
 ### Install SiteFarm
 ```
-$ terminus build:project:create --stability=dev --team="University of California Davis" ucdavis/sitefarm-pantheon my-sitefarm-site
+$ terminus build:project:create --stability=dev --team="University of California Davis" --org=ucdavis ucdavis/sitefarm-pantheon my-sitefarm-site
 ```
 
 Replace "my-sitefarm-site" would your desired site machine name in Pantheon.
