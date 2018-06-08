@@ -28,12 +28,12 @@
     "drupal/config_direct_save": "^1.0",
     "drupal/config_installer": "^1.0",
     "drupal/console": "^1.0.0-rc8",
-    "drupal/core": "^8",
+    "drupal/core": "^8.5",
     "drush/drush": "~8",
     "rvtraveller/qs-composer-installer": "^1.1",
-    "ucdavis/sitefarm": "dev-8.x-3.x",
-    "ucdavis/sitefarm_one": "dev-8.x-3.x",
-    "webflo/drupal-core-strict": "^8"
+    "ucdavis/sitefarm": "dev-8.x-4.x",
+    "ucdavis/sitefarm_one": "dev-8.x-4.x",
+    "webflo/drupal-core-strict": "^8.5"
   },
   "require-dev": {
     "mikey179/vfsstream": "^1.2",
@@ -121,7 +121,7 @@
     "preferred-install": "dist",
     "sort-packages": true,
     "platform": {
-      "php": "7.0"
+      "php": "7.0.8"
     }
   }
 }

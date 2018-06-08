@@ -135,34 +135,37 @@ $settings['hash_salt'] = 'S8hk3uuCAW46j8VxXtM_J6NAmKT7Vb9gXzyDRoncKgd2LqxIII5mh9
 $settings['install_profile'] = 'sitefarm';
 
 /**
- * Import CAS config from the Sitefarm Acquia factory hooks if available
- */
-$cas_settings_include = __DIR__ . '/../../../factory-hooks/post-settings-php/cas.php';
-if (file_exists($cas_settings_include)) {
-  include $cas_settings_include;
-}
-
-/**
  * Save emails to file
  * This requires the Devel module to be enabled
  */
 //$config['system.mail']['interface']['default'] = 'devel_mail_log';
 
 /**
+ * Private file path:
+ *
+ * A local file system path where private files will be stored. This directory
+ * must be absolute, outside of the Drupal installation directory and not
+ * accessible over the web.
+ *
+ * Note: Caches need to be cleared when this value is changed to make the
+ * private:// stream wrapper available to the system.
+ *
+ * See https://www.drupal.org/documentation/modules/file for more information
+ * about securing private files.
+ */
+$settings['file_private_path'] = 'sites/default/files';
+
+/**
  * Database settings - Edit these as needed
  */
 $databases['default']['default'] = array (
-  'database' => 'database_name_goes_here',
+  'database' => 'default',
   'username' => 'root',
   'password' => 'root',
   'prefix' => '',
-  'host' => 'localhost',
+  'host' => 'db',
   'port' => '3306',
   'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
   'driver' => 'mysql',
 );
 
-/**
- * Configuration Sync directory - Edit this as needed
- */
-$config_directories['sync'] = 'sites/default/files/config_XFJgWG0OOBwFg8asfsKWO8sMf6eYyOq5dbrv14FqkavRVEY6j61JoCbiJ9T_rqphSfdKjkD2Kw/sync';
