@@ -15,6 +15,9 @@ SITE_DIRECTORY="default"
 DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
 SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
 
+# Create new Pantheon site backup
+terminus backup:create ${PANTHEON_SITE}.${PANTHEON_ENV} -q
+
 # Set local config files
 cp $SITEDIR_PATH/default.settings.local.php $SITEDIR_PATH/settings.local.php
 cp $SITEDIR_PATH/default.services.local.yml $SITEDIR_PATH/services.local.yml
