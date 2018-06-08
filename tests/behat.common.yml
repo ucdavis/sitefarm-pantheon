@@ -61,14 +61,26 @@ default:
         Article Page Title: ".page-title--plain"
         Breadcrumb: ".breadcrumbs"
 
-# Setup for Google Chrome only tests.
-chrome:
-  suites:
-    default:
-      filters:
-        tags: "@chrome"
+
+# Docker profile.
+# For use inside the CLI container in Docksal.
+docker:
   extensions:
     Behat\MinkExtension:
+      # URL of the site when accessed inside Docksal.
+      base_url: http://web
+      show_cmd: '/usr/bin/google-chrome %s'
+      # Configure browser to be used. Browser must be available on wd_host.
+      # Stick with chrome by default. It's 2x faster than firefox or phantomjs (your results may vary).
       selenium2:
         browser: chrome
-        capabilities: {"browser": "chrome", "browserName": "chrome", "browserVersion": "ANY", "version": "ANY"}
+        wd_host: http://browser:4444/wd/hub
+        capabilities: {"browser": "chrome", "browserName": "chrome", "browserVersion": "ANY", "version": "ANY", 'chrome': {'switches':['--no-sandbox']}, "marionette": true}
+    Drupal\DrupalExtension:
+      api_driver: 'drupal'
+      drupal:
+        # Site docroot inside Docksal.
+        drupal_root: /var/www/web
+      drush:
+        # Site docroot inside Docksal.
+        root: /var/www/web

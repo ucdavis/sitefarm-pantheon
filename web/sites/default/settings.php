@@ -32,6 +32,13 @@ if (file_exists($local_settings)) {
 }
 
 /**
+ * CAS module should use ssodev when it's not a live site.
+ */
+if (!defined('PANTHEON_ENVIRONMENT') || $_ENV['PANTHEON_ENVIRONMENT'] != 'live') {
+  $config['cas.settings']['server']['hostname'] = 'ssodev.ucdavis.edu';
+}
+
+/**
  * Always install the 'standard' profile to stop the installer from
  * modifying settings.php.
  *

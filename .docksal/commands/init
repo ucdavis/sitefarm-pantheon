@@ -1,161 +1,76 @@
 #!/usr/bin/env bash
 
+## Initialize stack and site (full reset)
+##
+## Usage: fin init
+
 # Abort if anything fails
-# set -e
+set -e
 
-UPDATECOMPOSER=false
-DATABASE=true
-FILES=true
+#-------------------------- Helper functions --------------------------------
 
-while getopts 'dfcs:e:' flag; do
-  case $flag in
-    c)
-      UPDATECOMPOSER=true
-      ;;
-    s)
-      PANTHEON_SITE=${OPTARG}
-      ;;
-    e)
-      PANTHEON_ENV=${OPTARG}
-      ;;
-    d)
-      FILES=false
-      ;;
-    f)
-      DATABASE=false
-      ;;
-  esac
-done
+# Console colors
+red='\033[0;31m'
+green='\033[0;32m'
+green_bg='\033[42m'
+yellow='\033[1;33m'
+NC='\033[0m'
 
-#-------------------------- Settings --------------------------------
+echo-red () { echo -e "${red}$1${NC}"; }
+echo-green () { echo -e "${green}$1${NC}"; }
+echo-green-bg () { echo -e "${green_bg}$1${NC}"; }
+echo-yellow () { echo -e "${yellow}$1${NC}"; }
 
-# PROJECT_ROOT is passed from fin.
-# The following variables are configured in the '.env' file: DOCROOT, VIRTUAL_HOST.
+#-------------------------- Execution --------------------------------
 
-SITE_DIRECTORY=${SITE_DIRECTORY:-default}
-DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
-SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
-
-#-------------------------- END: Settings --------------------------------
-
-cd $PROJECT_ROOT
-
-# Start containers
-fin up
-
-# Check to see if docksal-local.env exists, and that $PANTHEON_TOKEN is available
+# Set docksal-local.env
 if [[ ! -f "$PROJECT_ROOT/.docksal/docksal-local.env" ]]; then
-	echo "Could not find docksal-local.env. Creating..."
-	cp $PROJECT_ROOT/.docksal/example.docksal-local.env $PROJECT_ROOT/.docksal/docksal-local.env
+    cp $PROJECT_ROOT/.docksal/example.docksal-local.env $PROJECT_ROOT/.docksal/docksal-local.env
+    echo -e "${yellow}This local environment setup is a Five (5) step process. It will begin after you provide some initial information."
+    echo -e "Please Enter Your Terminus Machine Token:${NC}"
+    read token
+    echo "SECRET_TERMINUS_TOKEN=\"$token\"" >> $PROJECT_ROOT/.docksal/docksal-local.env
 fi
+echo "Set up local Docksal environment file."
 
-if [ ${#PANTHEON_TOKEN} -eq 0 ]; then
-echo "Please enter your PANTHEON_TOKEN in the docksal-local.env file." ; exit
+# Stack initialization
+echo -e "${green_bg} Step 1 ${NC}${green} Initializing stack...${NC}"
+if [[ $DOCKER_RUNNING == "true" ]]; then
+	fin reset -f
+else
+	fin up
 fi
+echo "Waiting 10s for MySQL to initialize...";
+sleep 10
 
-if [ ${#PANTHEON_SITE} -eq 0 ]; then
-echo "Please enter your PANTHEON_SITE in the docksal-local.env file." ; exit
-fi
+echo -e "${green_bg} Step 2 ${NC}${green} Get the code and put it in the right place.${NC}"
+#Make composer run faster
+fin exec composer global require hirak/prestissimo
 
-if $UPDATECOMPOSER ; then
-    fin exec composer -n global require -n "hirak/prestissimo:^0.3"
-    fin exec composer -n global require -n "pantheon-systems/terminus:~1"
-    fin exec "mkdir -p ~/.terminus/plugins"
-    RSYNC=$(fin exec "find ~/.terminus/plugins -name terminus-rsync-plugin")
-    if [ ${#RSYNC} -eq 0 ] ; then
-        fin exec "composer create-project --no-dev -d ~/.terminus/plugins pantheon-systems/terminus-rsync-plugin:~1"
-    fi
-    fin exec "composer update -d ~/.terminus/plugins/terminus-rsync-plugin"
-
-    # Remove old directories and install
-    rm -rf $PROJECT_ROOT/vendor
-    echo "Deleted: $PROJECT_ROOT/vendor"
-    rm -rf $DOCROOT_PATH/core
-    echo "Deleted: $DOCROOT_PATH/core"
-    rm -rf $DOCROOT_PATH/modules/contrib
-    echo "Deleted: $DOCROOT_PATH/modules/contrib"
-    fin exec "composer install"
-fi
-
-# Log into Terminus
-fin exec terminus auth:login --machine-token=$PANTHEON_TOKEN
-fin exec terminus env:wake ${PANTHEON_SITE}.${PANTHEON_ENV}
-
-# Set permissions
-echo "Setting $SITEDIR_PATH permissions..."
-sudo chmod 755 $SITEDIR_PATH
-# Set local config files
-cp $SITEDIR_PATH/default.settings.local.php $SITEDIR_PATH/settings.local.php
-cp $SITEDIR_PATH/default.services.local.yml $SITEDIR_PATH/services.local.yml
-
-# Set extra config
-echo "
-\$databases['default']['default'] = array (
-  'database' => 'default',
-  'username' => 'user',
-  'password' => 'user',
-  'prefix' => '',
-  'host' => '$(fin vm ip)',
-  'port' => '${MYSQL_PORT_MAPPING%%:*}',
-  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
-  'driver' => 'mysql',
-);
-" >> $SITEDIR_PATH/settings.local.php
+# run composer install
+fin exec composer install
 
 # Set hosts
-echo "Setting hosts..."
-fin hosts remove $VIRTUAL_HOST
-fin hosts add $VIRTUAL_HOST
+echo -e "${green_bg} Step 3 ${NC}${green} Configuring DNS: ${VIRTUAL_HOST} ${NC}"
+fin hosts remove ${VIRTUAL_HOST}
+fin hosts add ${VIRTUAL_HOST}
 
-cd $SITEDIR_PATH
+# Site initialization
+echo -e "${green_bg} Step 4 ${NC}${green} Initializing site...${NC}"
 
-if $FILES; then
-  echo "Downloading latest set of files from ${PANTHEON_SITE}.${PANTHEON_ENV}..."
-  fin exec "terminus rsync ${PANTHEON_SITE}.${PANTHEON_ENV}:files . "
+fin init-site
 
-  echo "Fixing files directory permissions..."
-  chmod -R 755 files
-fi
+# Sync the data with Pantheon environement
+echo -e "${green_bg} Step 5 ${NC}${green} Syncing Data with Pantheon...${NC}"
 
-## Install site
-if $DATABASE; then
-  DBFILE="/tmp/${PANTHEON_SITE}.sql"
-  fin exec "rm -rf $DBFILE"
-  if [ ! -f $DBFILE ] || [ ! -z $(find $DBFILE -mmin +60) ] ; then
-    echo "$DBFILE needs updating."
-    echo 'Exporting latest database...'
-      if [ -f $DBFILE ] && [ ! -z $(find $DBFILE -mmin +60) ]; then
-        fin exec "rm -rf $DBFILE"
-      fi
-      DBCONN=$(fin exec "terminus connection:info $PANTHEON_SITE.$PANTHEON_ENV --field='MySQL Command'");
-      DBCONN=${DBCONN//$'\r'/}
-      DBDUMP="${DBCONN/mysql /mysqldump } --result-file=$DBFILE"
-      fin exec "$DBDUMP"
-      echo 'Importing database...'
-      fin exec "cat $DBFILE" | fin db import
-  else
-      fin exec "cat $DBFILE" | fin db import
-  fi
-fi
+fin refresh
 
-# Run update.php
-echo 'Running Drupal updates...'
-fin drush cr
-fin drush updb -y
-
-# Sanitize the DB
-fin drush sql-sanitize -y
-
-# Set Docksal Solr Server
-fin drush sql-query "UPDATE search_api_server SET options=REPLACE(options, 's:9:\"localhost\"', 's:4:\"solr\"') WHERE machine_name='solr_server'"
-
-cd ${DOCROOT_PATH}
-
-# Set permissions
-sudo chmod 755 $SITEDIR_PATH
-
-echo "To reindex Solr, run: fin drush search-api-reindex ; fin drush search-api-index"
+echo -e "${green_bg} DONE! ${NC} "
+echo -e "Use command-click on the URLs below to open them in your browser."
+echo -e "Open ${yellow}http://${VIRTUAL_HOST}${NC} in your browser to verify the setup."
 
 # Get login link
-echo "Access site here: "
-fin drush uli --uri="http://$VIRTUAL_HOST"
+echo -en "Login to Your Site: ${yellow}"
+cd ${DOCROOT}
+fin drush uli --uri="http://${VIRTUAL_HOST}"
+echo -en "${NC}"

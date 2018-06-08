@@ -1,6 +1,8 @@
 #
 # behat.yml file for testing on Pantheon.
 #
+imports:
+    - behat.common.yml
 default:
   suites:
     default:
@@ -14,8 +16,10 @@ default:
   extensions:
     Behat\MinkExtension:
       goutte: ~
-      selenium2: ~
-      files_path: './data-files'
+      selenium2:
+        browser: chrome
+        capabilities: {"browser": "chrome", "browserName": "chrome", "browserVersion": "ANY", "version": "ANY", 'chrome': {'switches':['--no-sandbox']}}
+      files_path: './files'
     Drupal\DrupalExtension:
       blackbox: ~
       api_driver: 'drush'

@@ -10,6 +10,12 @@ services:
       service: web
     depends_on:
       - cli
+    environment:
+      - APACHE_FILE_PROXY
+    volumes:
+      - ${PROJECT_ROOT}/.docksal/etc/apache/host.conf:/usr/local/apache2/conf/extra/includes/host.conf:ro
+    labels:
+      - io.docksal.virtual-host=${VIRTUAL_HOST},*.${VIRTUAL_HOST}
 
   # DB
   db:
@@ -22,6 +28,20 @@ services:
     extends:
       file: ${HOME}/.docksal/stacks/services.yml
       service: cli
+    environment:
+      - DOCROOT
+      - XDEBUG_ENABLED=${XDEBUG_ENABLED:-0}
+      - XDEBUG_CONFIG=remote_connect_back=0 remote_host=${DOCKSAL_HOST_IP}  # Point xdebug to the host IP
+      - PANTHEON_SITE
+      - PANTHEON_ENV
+      - TERMINUS_EMAIL
+      - TERMINUS_TOKEN
+      - VIRTUAL_HOST
+      - MYSQL_PORT
+      - VNC_PORT_MAPPING
+    volumes:
+      - project_root:/var/www:rw,nocopy  # Project root volume
+      - ${PROJECT_ROOT}/.docksal/etc/drush:/etc/drush:ro
 
   # Varnish
   varnish:
