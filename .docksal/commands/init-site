@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+#: exec_target = cli
+
+## Initialize stack and site (full reset)
+##
+## Usage: fin init-site
+
+# Abort if anything fails
+set -e
+
+# PROJECT_ROOT is passed from fin.
+# The following variables are configured in the '.env' file: DOCROOT, VIRTUAL_HOST.
+SITE_DIRECTORY="default"
+DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
+SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
+
+# Set local config files
+cp $SITEDIR_PATH/default.settings.local.php $SITEDIR_PATH/settings.local.php
+cp $SITEDIR_PATH/default.services.local.yml $SITEDIR_PATH/services.local.yml
+
+echo "Set up local Drupal settings and services."
+
+
+# Set permissions
+sudo chmod 755 $SITEDIR_PATH
+
+echo "Set permissions for the site directory path."

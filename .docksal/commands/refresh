@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+
+#: exec_target = cli
+
+## Refresh database, files, and import configuration
+##
+## Usage: fin refresh
+
+# Abort if anything fails
+set -e
+
+LIVE=false
+ELEMENTS='db'
+
+# options may be followed by one colon to indicate they have a required argument
+if ! options=$(getopt -o s:e:d:l -l site:,env:,live,data: -- "$@")
+then
+    # something went wrong, getopt will put out an error message for us
+    exit 1
+fi
+
+while [ $# -gt 0 ]
+do
+    case $1 in
+    -s|--site) PANTHEON_SITE="$2"; shift ;;
+    -e|--env) PANTHEON_ENV="$2"; shift ;;
+    -l|--live) LIVE=true; ;;
+    -d|--data) ELEMENTS="$2"; shift;;
+    esac
+    shift
+done
+
+TMP_USER=$(terminus whoami);
+DOCROOT=${DOCROOT:-docroot};
+SITE_DIRECTORY=${SITE_DIRECTORY:-default};
+
+if [ -z "$TMP_USER" ]; then
+    terminus login --machine-token="${SECRET_TERMINUS_TOKEN}"
+fi;
+
+DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
+SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
+
+cd $PROJECT_ROOT
+cd $SITEDIR_PATH
+
+if [ ! -d ~/tmp ]; then
+    mkdir ~/tmp
+fi
+
+if [ $ELEMENTS = 'all' ] || [ $ELEMENTS = 'db' ]; then
+    DBFILE="/tmp/${PANTHEON_SITE}.${PANTHEON_ENV}.sql"
+    if $LIVE || [ ! -f $DBFILE ] || [ ! -z $(find ${DBFILE} -mmin +3600) ]; then
+     echo "${DBFILE} need updating"
+
+      if [ -f $DBFILE ] && [ ! -z $(find ${DBFILE} -mmin +3600) ]; then
+        echo "Removing downloaded db file."
+        rm -rf $DBFILE
+      fi
+
+      if $LIVE ; then
+        echo "Exporting database from ${PANTHEON_SITE}.${PANTHEON_ENV}."
+        terminus env:wake ${PANTHEON_SITE}.${PANTHEON_ENV}
+        DBCONN=$(terminus connection:info ${PANTHEON_SITE}.${PANTHEON_ENV} --field="MySQL Command")
+        DBDUMP=${DBCONN/mysql /mysqldump }
+        eval $DBDUMP " --result-file=${DBFILE}"
+      else
+        echo "Downloading latest database backup from ${PANTHEON_SITE}.${PANTHEON_ENV}."
+        terminus backup:get ${PANTHEON_SITE}.${PANTHEON_ENV} --element="db" --to="${DBFILE}.gz"
+        gunzip ${DBFILE}.gz
+      fi
+    fi
+
+    echo "Importing Database..."
+    drush sql-cli < ${DBFILE}
+    cd ${DOCROOT_PATH}
+    drush cr
+    drush updb -y
+    drush cim -y
+    drush uli -l ${VIRTUAL_HOST}
+fi
+
+if [ $ELEMENTS = 'all' ] || [ $ELEMENTS = 'files' ]; then
+    cd $SITEDIR_PATH
+    echo "Downloading latest set of files from ${PANTHEON_SITE}..."
+
+    FILES_DIRECTORY=${PROJECT_ROOT}/sites/${SITE_DIRECTORY}/files
+    mkdir ${FILES_DIRECTORY}
+    if $LIVE ; then
+        if [ ! -d ${FILES_DIRECTORY} ]; then
+            mkdir ${FILES_DIRECTORY}
+        fi
+        cd $FILES_DIRECTORY
+      terminus rsync ${PANTHEON_SITE}.${PANTHEON_ENV}:files .
+    else
+      FILES="/tmp/${PANTHEON_ENV}.${PANTHEON_SITE}.tar.gz"
+      terminus backup:get ${PANTHEON_SITE}.${PANTHEON_ENV} --element=files --to="${FILES}"
+      rm -rf ${FILES_DIRECTORY}
+      tar -xf ${FILES}
+      mv files_* files
+    fi
+    echo "Fixing files directory permissions..."
+    chmod -R 755 files
+fi
+
+cd ${DOCROOT_PATH}
