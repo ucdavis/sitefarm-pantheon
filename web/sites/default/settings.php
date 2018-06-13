@@ -36,6 +36,7 @@ if (file_exists($local_settings)) {
  */
 if (!defined('PANTHEON_ENVIRONMENT') || $_ENV['PANTHEON_ENVIRONMENT'] != 'live') {
   $config['cas.settings']['server']['hostname'] = 'ssodev.ucdavis.edu';
+  $config['cas.settings']['server']['path'] = '/cas';
 }
 
 /**

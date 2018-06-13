@@ -39,6 +39,7 @@ services:
       - VIRTUAL_HOST
       - MYSQL_PORT
       - VNC_PORT_MAPPING
+      - APACHE_FILE_PROXY
     volumes:
       - project_root:/var/www:rw,nocopy  # Project root volume
       - ${PROJECT_ROOT}/.docksal/etc/drush:/etc/drush:ro
