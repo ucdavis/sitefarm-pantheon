@@ -15,8 +15,15 @@ SITE_DIRECTORY="default"
 DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
 SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
 
+# Log into Terminus.
+TMP_USER=$(terminus whoami);
+
+if [ -z "$TMP_USER" ]; then
+    terminus login --machine-token="${SECRET_TERMINUS_TOKEN}"
+fi;
+
 # Create new Pantheon site backup
-terminus backup:create ${PANTHEON_SITE}.${PANTHEON_ENV} -q
+terminus backup:create ${PANTHEON_SITE}.${PANTHEON_ENV}
 
 # Set local config files
 cp $SITEDIR_PATH/default.settings.local.php $SITEDIR_PATH/settings.local.php
