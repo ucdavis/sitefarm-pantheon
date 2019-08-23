@@ -6,8 +6,9 @@ default:
       paths:
         - %paths.base%/features
       filters:
-        tags: "~@chrome"
+        tags: "~@deprecated"
       contexts:
+        - FeatureContext
         - Drupal\DrupalExtension\Context\DrupalContext
         - Drupal\DrupalExtension\Context\MinkContext
         - Drupal\DrupalExtension\Context\MessageContext
@@ -35,6 +36,7 @@ default:
         Navigation Region: ".region-navigation"
         Quick Links Region: ".region-quick-links"
         Page Title Region: ".region-page-title"
+        Link Grid Region: ".region-link-grid"
         Pre Content Region: ".region-pre-content"
         Top Content 1 Region: ".region-top-content-first"
         Top Content 2 Region: ".region-top-content-second"
@@ -56,11 +58,24 @@ default:
         Footer: ".l-footer"
         # Seven Theme
         Admin Content: ".region-content"
+        Admin Primary Tabs: ".tabs"
         # Page Elements
-        Page Title: ".page-title"
+        Admin Page Title: ".page-title"
         Article Page Title: ".page-title--plain"
         Breadcrumb: ".breadcrumbs"
+        Highlighted: ".region-highlighted"
 
+# Setup for Google Chrome only tests.
+chrome:
+  suites:
+    default:
+      filters:
+        tags: "@chrome"
+  extensions:
+    Behat\MinkExtension:
+      selenium2:
+        browser: chrome
+        capabilities: {"browser": "chrome", "browserName": "chrome", "browserVersion": "ANY", "version": "ANY"}
 
 # Docker profile.
 # For use inside the CLI container in Docksal.
@@ -69,7 +84,6 @@ docker:
     Behat\MinkExtension:
       # URL of the site when accessed inside Docksal.
       base_url: http://web
-      show_cmd: '/usr/bin/google-chrome %s'
       # Configure browser to be used. Browser must be available on wd_host.
       # Stick with chrome by default. It's 2x faster than firefox or phantomjs (your results may vary).
       selenium2:

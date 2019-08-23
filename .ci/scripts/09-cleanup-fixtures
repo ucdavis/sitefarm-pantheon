@@ -9,4 +9,3 @@ set -eo pipefail
 # multidev sites to persist until the next time the 'prepare' or
 # 'merge-master' scripts (respectively) are called.
 #
-
