@@ -1,12 +1,10 @@
-# SiteFarm on Pantheon
+# Example Drops 8 Composer
 
 [![CircleCI](https://circleci.com/gh/pantheon-systems/example-drops-8-composer.svg?style=shield)](https://circleci.com/gh/pantheon-systems/example-drops-8-composer)
 [![Pantheon example-drops-8-composer](https://img.shields.io/badge/dashboard-drops_8-yellow.svg)](https://dashboard.pantheon.io/sites/c401fd14-f745-4e51-9af2-f30b45146a0c#dev/code) 
 [![Dev Site example-drops-8-composer](https://img.shields.io/badge/site-drops_8-blue.svg)](http://dev-example-drops-8-composer.pantheonsite.io/)
 
-## Overview
-
-This project contains only the canonical resources used to build a SiteFarm Drupal site for use on Pantheon. 
+This repository is a start state for a Composer-based SiteFarm Drupal workflow with Pantheon. It is meant to be copied by the the [Terminus Build Tools Plugin](https://github.com/pantheon-systems/terminus-build-tools-plugin) which will set up for you a brand new
 
 * GitHub repo
 * Free Pantheon sandbox site
@@ -34,12 +32,16 @@ export GITHUB_TOKEN=[REDACTED]
 export CIRCLE_TOKEN=[REDACTED]
 ```
 
-### Install SiteFarm
+### One command setup:
+
+Once you have all of the prerequisites in place, you can create your copy of this repo with one command:
+
 ```
-$ terminus build:project:create --stability=dev --team="University of California Davis" --org=ucdavis ucdavis/sitefarm-pantheon my-sitefarm-site
+$ terminus build:project:create ucdavis/sitefarm-pantheon --git=bitbucket --stability=dev --team="University of California Davis" --org=ucdavis my-sitefarm-site
 ```
 
 Replace "my-sitefarm-site" would your desired site machine name in Pantheon.
+Replace "--org=ucdavis" with your own bitbucket team.
 
 Once the build is completed, log into CircleCI and add the CircleCI Private SSH Key 
 to your new project so that it can access the private repos on Bitbucket.
@@ -75,16 +77,7 @@ So that CircleCI will have some test to run, this repository includes a configur
 
 ## Updating your site
 
-When using this repository to manage your Drupal site, you will no longer use the Pantheon dashboard to update your Drupal version. Instead, you will manage your updates using Composer. Updates can be applied either directly on Pantheon, by using Terminus, or on your local machine.
+When using this repository to manage your Drupal site, you will no longer use the Pantheon dashboard to update your Drupal version. Instead, you will manage your updates using Composer. Updates can be applied either directly on Pantheon, by using Terminus, or on your local machine. You may also place your site in Git mode, clone it locally, and then run composer commands from there.  Commit and push your files back up to Pantheon as usual.
 
-#### Update with Terminus
 
-Install [Terminus 1](https://pantheon.io/docs/terminus/) and the [Terminus Composer plugin](https://github.com/pantheon-systems/terminus-composer-plugin).  Then, to update your site, ensure it is in SFTP mode, and then run:
-```
-terminus composer <sitename>.<dev> update
-```
-Other commands will work as well; for example, you may install new modules using `terminus composer <sitename>.<dev> require drupal/pathauto`.
 
-#### Update on your local machine
-
-You may also place your site in Git mode, clone it locally, and then run composer commands from there.  Commit and push your files back up to Pantheon as usual.

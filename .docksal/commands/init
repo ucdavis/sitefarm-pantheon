@@ -22,19 +22,16 @@ echo-green-bg () { echo -e "${green_bg}$1${NC}"; }
 echo-yellow () { echo -e "${yellow}$1${NC}"; }
 
 #-------------------------- Execution --------------------------------
-echo -e "${yellow}This local environment setup is a Five (5) step process. It will begin after you provide some initial information."
 
 # Set docksal-local.env
 if [[ ! -f "$PROJECT_ROOT/.docksal/docksal-local.env" ]]; then
-    echo "Set up local Docksal environment file."
     cp $PROJECT_ROOT/.docksal/example.docksal-local.env $PROJECT_ROOT/.docksal/docksal-local.env
-fi
-
-# Set Terminus token.
-if [ -z "$SECRET_TERMINUS_TOKEN" ]; then
-    echo -e "Please Enter Your Terminus Machine Token:${NC}"
-    read token
-    echo "SECRET_TERMINUS_TOKEN=\"$token\"" >> $PROJECT_ROOT/.docksal/docksal-local.env
+    echo -e "${yellow}This local environment setup is a Five (5) step process. It will begin after you provide some initial information."
+    if [ $SECRET_TERMINUS_TOKEN = '' ]; then
+        echo -e "Please Enter Your Terminus Machine Token:${NC}"
+        read token
+        echo "SECRET_TERMINUS_TOKEN=\"$token\"" >> $PROJECT_ROOT/.docksal/docksal-local.env
+    fi
 fi
 
 # Stack initialization
@@ -51,18 +48,28 @@ echo -e "${green_bg} Step 2 ${NC}${green} Get the code and put it in the right p
 #Make composer run faster
 fin exec composer global require hirak/prestissimo
 
-# run composer install
+# Remove old directories and install
+rm -rf $PROJECT_ROOT/vendor
+echo "Deleted: $PROJECT_ROOT/vendor"
+rm -rf $DOCROOT_PATH/core
+echo "Deleted: $DOCROOT_PATH/core"
+rm -rf $DOCROOT_PATH/libraries
+echo "Deleted: $DOCROOT_PATH/libraries"
+rm -rf $DOCROOT_PATH/modules/contrib
+echo "Deleted: $DOCROOT_PATH/modules/contrib"
 fin exec composer install
 
 # Set hosts
 echo -e "${green_bg} Step 3 ${NC}${green} Configuring DNS: ${VIRTUAL_HOST} ${NC}"
-fin hosts remove
-fin hosts add
+fin hosts remove ${VIRTUAL_HOST}
+fin hosts add ${VIRTUAL_HOST}
 
 # Site initialization
 echo -e "${green_bg} Step 4 ${NC}${green} Initializing site...${NC}"
-
-fin init-site
+# Set local config files
+fin perm
+cp $SITEDIR_PATH/default.settings.local.php $SITEDIR_PATH/settings.local.php
+cp $SITEDIR_PATH/default.services.local.yml $SITEDIR_PATH/services.local.yml
 
 # Sync the data with Pantheon environement
 echo -e "${green_bg} Step 5 ${NC}${green} Syncing Data with Pantheon...${NC}"

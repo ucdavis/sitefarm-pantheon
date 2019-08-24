@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+#-------------------------- Settings --------------------------------
+
+# PROJECT_ROOT is passed from fin.
+# The following variables are configured in the '.env' file: DOCROOT, VIRTUAL_HOST, SITE_DIRECTORY.
+
+DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
+SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
+
+#-------------------------- END: Settings --------------------------------
+
+# Set write permission for SITE_DIRECTORY
+chmod -R 755 $SITEDIR_PATH
+echo "$SITEDIR_PATH is now writable"
