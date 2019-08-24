@@ -22,14 +22,17 @@ Before running the `terminus build:project:create` command, make sure you have a
 * [A Pantheon account](https://dashboard.pantheon.io/register)
 * [Terminus, the Pantheon command line tool](https://pantheon.io/docs/terminus/install/)
 * [The Terminus Build Tools Plugin](https://github.com/pantheon-systems/terminus-build-tools-plugin)
-* An account with GitHub and an authentication token capable of creating new repos.
+* An account with Bitbucket and an app password capable of creating new repos. Or An account with GitHub and an authentication token capable of creating new repos.
 * An account with CircleCI and an authentication token.
 
-You may find it easier to export the GitHub and CircleCI tokens as variables on your command line where the Build Tools Plugin can detect them automatically:
+You may find it easier to export the Bitbucket (or GitHub) and CircleCI tokens as variables on your command line where the Build Tools Plugin can detect them automatically:
 
 ```
 export GITHUB_TOKEN=[REDACTED]
 export CIRCLE_TOKEN=[REDACTED]
+export BITBUCKET_USER=[REDACTED]
+export BITBUCKET_PASS=[REDACTED]
+
 ```
 
 ### One command setup:
