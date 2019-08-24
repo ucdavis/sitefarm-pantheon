@@ -13,7 +13,7 @@
             "name": "Shawn DeArmond",
             "email": "sgdearmond@ucdavis.edu",
             "role": "Developer"
-        },
+        }
     ],
     "repositories": {
         "drupal": {
