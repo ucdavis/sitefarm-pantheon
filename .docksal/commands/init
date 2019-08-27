@@ -21,6 +21,9 @@ echo-green () { echo -e "${green}$1${NC}"; }
 echo-green-bg () { echo -e "${green_bg}$1${NC}"; }
 echo-yellow () { echo -e "${yellow}$1${NC}"; }
 
+DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
+SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
+
 #-------------------------- Execution --------------------------------
 
 # Set docksal-local.env
@@ -74,7 +77,7 @@ cp $SITEDIR_PATH/default.services.local.yml $SITEDIR_PATH/services.local.yml
 # Sync the data with Pantheon environement
 echo -e "${green_bg} Step 5 ${NC}${green} Syncing Data with Pantheon...${NC}"
 
-fin refresh
+fin refresh -l
 
 echo -e "${green_bg} DONE! ${NC} "
 echo -e "Use command-click on the URLs below to open them in your browser."
