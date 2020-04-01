@@ -21,20 +21,24 @@ echo-green () { echo -e "${green}$1${NC}"; }
 echo-green-bg () { echo -e "${green_bg}$1${NC}"; }
 echo-yellow () { echo -e "${yellow}$1${NC}"; }
 
+DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
+SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
+
 #-------------------------- Execution --------------------------------
-echo -e "${yellow}This local environment setup is a Five (5) step process. It will begin after you provide some initial information."
 
 # Set docksal-local.env
 if [[ ! -f "$PROJECT_ROOT/.docksal/docksal-local.env" ]]; then
-    echo "Set up local Docksal environment file."
+    echo -e "${green}This local environment setup is a Five (5) step process. It will begin after you provide some initial information.${NC}"
+    echo -e "Please Enter Your Pantheon Site Name: [${PWD##*/}]"
+    read sitename
     cp $PROJECT_ROOT/.docksal/example.docksal-local.env $PROJECT_ROOT/.docksal/docksal-local.env
+    fin config set --env=local PANTHEON_SITE="${sitename:-${PWD##*/}}"
 fi
 
-# Set Terminus token.
-if [ -z "$SECRET_TERMINUS_TOKEN" ]; then
-    echo -e "Please Enter Your Terminus Machine Token:${NC}"
+if [ $SECRET_TERMINUS_TOKEN = '' ]; then
+    echo -e "Please Enter Your Terminus Machine Token:"
     read token
-    echo "SECRET_TERMINUS_TOKEN=\"$token\"" >> $PROJECT_ROOT/.docksal/docksal-local.env
+    fin config set --global SECRET_TERMINUS_TOKEN="${sitename:-${PWD##*/}}"
 fi
 
 # Stack initialization
@@ -51,23 +55,33 @@ echo -e "${green_bg} Step 2 ${NC}${green} Get the code and put it in the right p
 #Make composer run faster
 fin exec composer global require hirak/prestissimo
 
-# run composer install
+# Remove old directories and install
+rm -rf $PROJECT_ROOT/vendor
+echo "Deleted: $PROJECT_ROOT/vendor"
+rm -rf $DOCROOT_PATH/core
+echo "Deleted: $DOCROOT_PATH/core"
+rm -rf $DOCROOT_PATH/libraries
+echo "Deleted: $DOCROOT_PATH/libraries"
+rm -rf $DOCROOT_PATH/modules/contrib
+echo "Deleted: $DOCROOT_PATH/modules/contrib"
 fin exec composer install
 
 # Set hosts
 echo -e "${green_bg} Step 3 ${NC}${green} Configuring DNS: ${VIRTUAL_HOST} ${NC}"
-fin hosts remove
-fin hosts add
+fin hosts remove ${VIRTUAL_HOST}
+fin hosts add ${VIRTUAL_HOST}
 
 # Site initialization
 echo -e "${green_bg} Step 4 ${NC}${green} Initializing site...${NC}"
-
-fin init-site
+# Set local config files
+fin perm
+cp $SITEDIR_PATH/default.settings.local.php $SITEDIR_PATH/settings.local.php
+cp $SITEDIR_PATH/default.services.local.yml $SITEDIR_PATH/services.local.yml
 
 # Sync the data with Pantheon environement
 echo -e "${green_bg} Step 5 ${NC}${green} Syncing Data with Pantheon...${NC}"
 
-fin refresh
+fin refresh -l
 
 echo -e "${green_bg} DONE! ${NC} "
 echo -e "Use command-click on the URLs below to open them in your browser."

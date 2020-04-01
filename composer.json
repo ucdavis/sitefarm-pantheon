@@ -1,127 +1,162 @@
 {
-  "name": "ucdavis/sitefarm-pantheon",
-  "description": "Install SiteFarm with Composer on Pantheon.",
-  "type": "project",
-  "license": "proprietary",
-  "repositories": {
-    "drupal": {
-      "type": "composer",
-      "url": "https://packages.drupal.org/8"
+    "name": "ucdavis/sitefarm-pantheon",
+    "description": "Install SiteFarm with Composer on Pantheon.",
+    "type": "project",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Regents of the University of California",
+            "email": "copyright@ucdavis.edu",
+            "role": "Copyright Owner"
+        },
+        {
+            "name": "Shawn DeArmond",
+            "email": "sgdearmond@ucdavis.edu",
+            "role": "Developer"
+        }
+    ],
+    "repositories": {
+        "drupal": {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        },
+        "assets": {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        },
+        "ucdavis/sitefarm": {
+            "type": "vcs",
+            "url": "git@bitbucket.org:ietwebdev/sitefarm.git"
+        },
+        "ucdavis/aggiefeed": {
+            "type": "vcs",
+            "url": "git@bitbucket.org:ietwebdev/aggiefeed-drupal-module.git"
+        },
+        "ucdavis/sitefarm_one": {
+            "type": "vcs",
+            "url": "git@bitbucket.org:ietwebdev/sitefarm-theme-one.git"
+        }
     },
-    "ucdavis/sitefarm": {
-      "type": "vcs",
-      "url": "git@bitbucket.org:ietwebdev/sitefarm.git"
+    "require": {
+        "php": ">=7.2.0",
+        "composer/installers": "^1.0",
+        "cweagans/composer-patches": "^1.6",
+        "drupal-composer/drupal-scaffold": "^2.6.1",
+        "drupal/config_direct_save": "^1.0",
+        "drupal/config_installer": "^1.0",
+        "drupal/console": "^1.0",
+        "drupal/core": "8.7.*",
+        "drush-ops/behat-drush-endpoint": "^9.3",
+        "drush/drush": "~8.3",
+        "pantheon-systems/quicksilver-pushback": "~1",
+        "rvtraveller/qs-composer-installer": "^1.1",
+        "webflo/drupal-core-strict": "8.7.*",
+        "zaporylie/composer-drupal-optimizations": "^1.0",
+        "ucdavis/sitefarm": "dev-8.x-7.x",
+        "ucdavis/sitefarm_one": "dev-8.x-7.x"
     },
-    "ucdavis/aggiefeed": {
-      "type": "vcs",
-      "url": "git@bitbucket.org:ietwebdev/aggiefeed-drupal-module.git"
+    "require-dev": {
+        "behat/behat": "^3.1",
+        "behat/mink": "^1.7",
+        "behat/mink-extension": "^2.2",
+        "behat/mink-goutte-driver": "^1.2",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+        "drupal/coder": "^8.3.1",
+        "drupal/drupal-extension": "^3.1",
+        "jcalderonzumba/gastonjs": "^1.0.2",
+        "jcalderonzumba/mink-phantomjs-driver": "^0.3.1",
+        "mikey179/vfsstream": "^1.2",
+        "phpunit/phpunit": "^6.5",
+        "squizlabs/php_codesniffer": "^3.4.0",
+        "symfony/css-selector": "^2.8",
+        "rubenrua/symfony-clean-tags-composer-plugin": "^1.0"
     },
-    "ucdavis/sitefarm_one": {
-      "type": "vcs",
-      "url": "git@bitbucket.org:ietwebdev/sitefarm-theme-one.git"
+    "conflict": {
+            "drupal/drupal": "*"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "autoload": {
+        "classmap": [
+            "scripts/composer/ScriptHandler.php"
+        ],
+        "psr-4": {
+            "Sitefarm\\": "src"
+        }
+    },
+    "scripts": {
+        "build-assets": [
+            "@prepare-for-pantheon",
+            "composer install --optimize-autoloader --no-dev"
+        ],
+        "lint": "find web/modules/custom web/themes/custom -name '*.php' -exec php -l {} \\;",
+        "code-sniff": [
+            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md --ignore=node_modules,bower_components,vendor ./web/modules/custom",
+            "./vendor/bin/phpcs --standard=Drupal --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md --ignore=node_modules,bower_components,vendor ./web/themes/custom",
+            "./vendor/bin/phpcs --standard=DrupalPractice --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md --ignore=node_modules,bower_components,vendor ./web/modules/custom",
+            "./vendor/bin/phpcs --standard=DrupalPractice --extensions=php,module,inc,install,test,profile,theme,css,info,txt,md --ignore=node_modules,bower_components,vendor ./web/themes/custom"
+        ],
+        "unit-test": "echo 'No unit test step defined.'",
+        "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
+        "prepare-for-pantheon": "DrupalProject\\composer\\ScriptHandler::prepareForPantheon",
+        "post-install-cmd": [
+            "@drupal-scaffold",
+            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles",
+            "Sitefarm\\Composer\\Assets::rename"
+        ],
+        "post-update-cmd": [
+            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles",
+            "Sitefarm\\Composer\\Assets::rename"
+        ],
+        "post-create-project-cmd": [
+            "@drupal-scaffold",
+            "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
+        ]
+    },
+    "extra": {
+        "installer-types": [
+            "bower-asset",
+            "npm-asset"
+        ],
+        "installer-paths": {
+            "web/core": ["type:drupal-core"],
+            "web/libraries/{$name}": [
+                "type:drupal-library",
+                "type:bower-asset",
+                "type:npm-asset"
+            ],
+            "web/modules/contrib/{$name}": ["type:drupal-module"],
+            "web/profiles/contrib/{$name}": ["type:drupal-profile"],
+            "web/themes/contrib/{$name}": ["type:drupal-theme"],
+            "drush/Commands/contrib/{$name}": ["type:drupal-drush"]
+        },
+        "build-env": {
+            "install-cms": [
+                "drush site-install sitefarm --account-mail={account-mail} --account-name={account-name} --account-pass={account-pass} --site-mail={site-mail} --site-name={site-name} --yes"
+            ],
+            "export-configuration": "drush config-export --yes"
+        },
+        "drupal-scaffold": {
+            "source": "https://raw.githubusercontent.com/pantheon-systems/drops-8-scaffolding/{version}/{path}",
+            "includes": [
+                "sites/default/default.services.pantheon.preproduction.yml",
+                "sites/default/settings.pantheon.php"
+            ],
+            "excludes": [
+                ".csslintrc",
+                ".editorconfig",
+                ".eslintignore",
+                ".eslintrc.json",
+                ".htaccess",
+                "robots.txt",
+                "web.config"
+            ]
+        },
+        "enable-patching": true
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
     }
-  },
-  "require": {
-    "composer/installers": "^1.0.20",
-    "cweagans/composer-patches": "1.*",
-    "drupal-composer/drupal-scaffold": "^2.0.1",
-    "drupal/config_direct_save": "^1.0",
-    "drupal/config_installer": "^1.0",
-    "drupal/console": "^1.0.0-rc8",
-    "drupal/core": "^8.5",
-    "drush/drush": "~8",
-    "rvtraveller/qs-composer-installer": "^1.1",
-    "ucdavis/sitefarm": "dev-8.x-4.x",
-    "ucdavis/sitefarm_one": "dev-8.x-4.x",
-    "webflo/drupal-core-strict": "^8.5"
-  },
-  "require-dev": {
-    "mikey179/vfsstream": "^1.2",
-    "behat/behat": "3.*",
-    "behat/mink": "^1.7",
-    "behat/mink-extension": "^2.2",
-    "behat/mink-goutte-driver": "^1.2",
-    "jcalderonzumba/gastonjs": "^1.0.2",
-    "jcalderonzumba/mink-phantomjs-driver": "^0.3.1",
-    "drupal/drupal-extension": "^3.1",
-    "drush-ops/behat-drush-endpoint": "^0.0.4",
-    "pantheon-systems/quicksilver-pushback": "~1",
-    "phpunit/phpunit": "^4.8",
-    "symfony/css-selector": "^2.8"
-  },
-  "conflict": {
-      "drupal/drupal": "*"
-  },
-  "minimum-stability": "dev",
-  "prefer-stable": true,
-  "autoload": {
-    "classmap": [
-      "scripts/composer/ScriptHandler.php"
-    ]
-  },
-  "scripts": {
-    "build-assets": [
-      "@prepare-for-pantheon",
-      "composer install --optimize-autoloader"
-    ],
-    "lint": "find web/modules/custom web/themes/custom -name '*.php' -exec php -l {} \\;",
-    "code-sniff": "echo 'No code sniff step defined.'",
-    "unit-test": "echo 'No unit test step defined.'",
-    "drupal-scaffold": "DrupalComposer\\DrupalScaffold\\Plugin::scaffold",
-    "prepare-for-pantheon": "DrupalProject\\composer\\ScriptHandler::prepareForPantheon",
-    "post-install-cmd": [
-      "@drupal-scaffold",
-      "DrupalProject\\composer\\ScriptHandler::createRequiredFiles",
-      "cp -a web/profiles/contrib/sitefarm/libraries/. web/libraries/",
-      "rm -f web/robots.txt"
-    ],
-    "post-update-cmd": [
-      "DrupalProject\\composer\\ScriptHandler::createRequiredFiles",
-      "cp -a web/profiles/contrib/sitefarm/libraries/. web/libraries/",
-      "rm -f web/robots.txt"
-    ],
-    "post-create-project-cmd": [
-      "@drupal-scaffold",
-      "DrupalProject\\composer\\ScriptHandler::createRequiredFiles"
-    ]
-  },
-  "extra": {
-    "installer-paths": {
-      "web/core": ["type:drupal-core"],
-      "web/modules/contrib/{$name}": ["type:drupal-module"],
-      "web/profiles/contrib/{$name}": ["type:drupal-profile"],
-      "web/themes/contrib/{$name}": ["type:drupal-theme"],
-      "drush/contrib/{$name}": ["type:drupal-drush"]
-    },
-    "build-env": {
-      "install-cms": [
-        "drush site-install sitefarm --account-mail={account-mail} --account-name={account-name} --account-pass={account-pass} --site-mail={site-mail} --site-name={site-name} --yes",
-        "drush pm-enable config_direct_save --yes"
-      ],
-      "export-configuration": "drush config-export --yes"
-    },
-    "drupal-scaffold": {
-      "source": "https://raw.githubusercontent.com/pantheon-systems/drops-8/{version}/{path}",
-      "includes": [
-        "sites/default/default.services.pantheon.preproduction.yml",
-        "sites/default/settings.pantheon.php"
-      ],
-      "excludes": [
-        ".csslintrc",
-        ".editorconfig",
-        ".eslintignore",
-        ".eslintrc.json",
-        "web.config"
-      ]
-    },
-    "enable-patching": true
-  },
-  "config": {
-    "optimize-autoloader": true,
-    "preferred-install": "dist",
-    "sort-packages": true,
-    "platform": {
-      "php": "7.0.8"
-    }
-  }
 }

@@ -9,7 +9,7 @@ $settings['container_yamls'][] = __DIR__ . '/services.yml';
  * Include the Pantheon-specific settings file.
  *
  * n.b. The settings.pantheon.php file makes some changes
- *      that affect all envrionments that this site
+ *      that affect all environments that this site
  *      exists in.  Always include this file, even in
  *      a local development environment, to ensure that
  *      the site settings remain consistent.
@@ -36,13 +36,10 @@ if (file_exists($local_settings)) {
  */
 if (!defined('PANTHEON_ENVIRONMENT') || $_ENV['PANTHEON_ENVIRONMENT'] != 'live') {
   $config['cas.settings']['server']['hostname'] = 'ssodev.ucdavis.edu';
-  $config['cas.settings']['server']['path'] = '/cas';
 }
 
 /**
  * Always install the 'standard' profile to stop the installer from
  * modifying settings.php.
- *
- * See: tests/installer-features/installer.feature
  */
 $settings['install_profile'] = 'sitefarm';
