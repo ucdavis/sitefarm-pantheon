@@ -28,13 +28,17 @@ SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
 
 # Set docksal-local.env
 if [[ ! -f "$PROJECT_ROOT/.docksal/docksal-local.env" ]]; then
+    echo -e "${green}This local environment setup is a Five (5) step process. It will begin after you provide some initial information.${NC}"
+    echo -e "Please Enter Your Pantheon Site Name: [${PWD##*/}]"
+    read sitename
     cp $PROJECT_ROOT/.docksal/example.docksal-local.env $PROJECT_ROOT/.docksal/docksal-local.env
-    echo -e "${yellow}This local environment setup is a Five (5) step process. It will begin after you provide some initial information."
-    if [ $SECRET_TERMINUS_TOKEN = '' ]; then
-        echo -e "Please Enter Your Terminus Machine Token:${NC}"
-        read token
-        echo "SECRET_TERMINUS_TOKEN=\"$token\"" >> $PROJECT_ROOT/.docksal/docksal-local.env
-    fi
+    fin config set --env=local PANTHEON_SITE="${sitename:-${PWD##*/}}"
+fi
+
+if [ $SECRET_TERMINUS_TOKEN = '' ]; then
+    echo -e "Please Enter Your Terminus Machine Token:"
+    read token
+    fin config set --global SECRET_TERMINUS_TOKEN="${sitename:-${PWD##*/}}"
 fi
 
 # Stack initialization

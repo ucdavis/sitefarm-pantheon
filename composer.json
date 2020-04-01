@@ -45,15 +45,15 @@
         "drupal/config_direct_save": "^1.0",
         "drupal/config_installer": "^1.0",
         "drupal/console": "^1",
-        "drupal/core": "8.6.*",
+        "drupal/core": "8.7.*",
         "drush-ops/behat-drush-endpoint": "^9.3",
         "drush/drush": "~8.3",
         "pantheon-systems/quicksilver-pushback": "~1",
         "rvtraveller/qs-composer-installer": "^1.1",
-        "webflo/drupal-core-strict": "8.6.*",
+        "webflo/drupal-core-strict": "8.7.*",
         "zaporylie/composer-drupal-optimizations": "^1.0",
-        "ucdavis/sitefarm": "dev-8.x-6.x",
-        "ucdavis/sitefarm_one": "dev-8.x-6.x"
+        "ucdavis/sitefarm": "dev-8.x-7.x",
+        "ucdavis/sitefarm_one": "dev-8.x-7.x"
     },
     "require-dev": {
         "behat/behat": "3.*",
