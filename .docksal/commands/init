@@ -81,7 +81,7 @@ cp $SITEDIR_PATH/default.services.local.yml $SITEDIR_PATH/services.local.yml
 # Sync the data with Pantheon environement
 echo -e "${green_bg} Step 5 ${NC}${green} Syncing Data with Pantheon...${NC}"
 
-fin refresh -l
+fin refresh -l -data=all
 
 echo -e "${green_bg} DONE! ${NC} "
 echo -e "Use command-click on the URLs below to open them in your browser."
