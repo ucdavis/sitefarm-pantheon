@@ -1,14 +1,10 @@
-# Example Drops 8 Composer
+# SiteFarm Pantheon
 
 [![CircleCI](https://circleci.com/gh/pantheon-systems/example-drops-8-composer.svg?style=shield)](https://circleci.com/gh/pantheon-systems/example-drops-8-composer)
 [![Pantheon example-drops-8-composer](https://img.shields.io/badge/dashboard-drops_8-yellow.svg)](https://dashboard.pantheon.io/sites/c401fd14-f745-4e51-9af2-f30b45146a0c#dev/code) 
 [![Dev Site example-drops-8-composer](https://img.shields.io/badge/site-drops_8-blue.svg)](http://dev-example-drops-8-composer.pantheonsite.io/)
 
-<<<<<<< HEAD
 This repository is a start state for a Composer-based SiteFarm Drupal workflow with Pantheon. It is meant to be copied by the the [Terminus Build Tools Plugin](https://github.com/pantheon-systems/terminus-build-tools-plugin) which will set up for you a brand new
-=======
-This repository is a reference implementation and start state for a modern Drupal 8 workflow utilizing [Composer](https://getcomposer.org/), Continuous Integration (CI), Automated Testing, and Pantheon. Even though this is a good starting point, you will need to customize and maintain the CI/testing set up for your projects.
->>>>>>> upstream
 
 This repository is meant to be copied one-time by the the [Terminus Build Tools Plugin](https://github.com/pantheon-systems/terminus-build-tools-plugin) but can also be used as a template. It should not be cloned or forked directly.
 
@@ -18,42 +14,25 @@ The Terminus Build Tools plugin will scaffold a new project, including:
 * A free Pantheon sandbox site
 * Continuous Integration configuration/credential set up
 
-For more details and instructions on creating a new project, see the [Terminus Build Tools Plugin](https://github.com/pantheon-systems/terminus-build-tools-plugin/).
+## You will need:
 
-## Important files and directories
-
-### `/web`
-
-<<<<<<< HEAD
 * [A Pantheon account](https://dashboard.pantheon.io/register)
 * [Terminus, the Pantheon command line tool](https://pantheon.io/docs/terminus/install/)
 * [The Terminus Build Tools Plugin](https://github.com/pantheon-systems/terminus-build-tools-plugin)
-* An account with Bitbucket and an app password capable of creating new repos. Or An account with GitHub and an authentication token capable of creating new repos.
-* An account with CircleCI and an authentication token.
+* An account with Bitbucket and an app password capable of creating new repos. Or An account with GitHub and CircleCI and an authentication token capable of creating new repos.
 
 You may find it easier to export the Bitbucket (or GitHub) and CircleCI tokens as variables on your command line where the Build Tools Plugin can detect them automatically:
 
 ```
-export GITHUB_TOKEN=[REDACTED]
-export CIRCLE_TOKEN=[REDACTED]
 export BITBUCKET_USER=[REDACTED]
 export BITBUCKET_PASS=[REDACTED]
-
+# and/or
+export GITHUB_TOKEN=[REDACTED]
+export CIRCLE_TOKEN=[REDACTED]
 ```
-=======
-Pantheon will serve the site from the `/web` subdirectory due to the configuration in `pantheon.yml`. This is necessary for a Composer based workflow. Having your website in this subdirectory also allows for tests, scripts, and other files related to your project to be stored in your repo without polluting your web document root or being web accessible from Pantheon. They may still be accessible from your version control project if it is public. See [the `pantheon.yml`](https://pantheon.io/docs/pantheon-yml/#nested-docroot) documentation for details.
 
-#### `/config`
+## Run this one command and watch the magic happen
 
-One of the directories moved to the git root is `/config`. This directory holds Drupal's `.yml` configuration files. In more traditional repo structure these files would live at `/sites/default/config/`. Thanks to [this line in `settings.php`](https://github.com/pantheon-systems/example-drops-8-composer/blob/54c84275cafa66c86992e5232b5e1019954e98f3/web/sites/default/settings.php#L19), the config is moved entirely outside of the web root.
->>>>>>> upstream
-
-### `composer.json`
-This project uses Composer to manage third-party PHP dependencies.
-
-The `require` section of `composer.json` should be used for any dependencies your web project needs, even those that might only be used on non-Live environments. All dependencies in `require` will be pushed to Pantheon. 
-
-<<<<<<< HEAD
 ```
 $ terminus build:project:create ucdavis/sitefarm-pantheon --git=bitbucket --stability=dev --team="University of California Davis" --org=ucdavis my-sitefarm-site
 ```
@@ -61,25 +40,31 @@ $ terminus build:project:create ucdavis/sitefarm-pantheon --git=bitbucket --stab
 Replace "my-sitefarm-site" would your desired site machine name in Pantheon.
 Replace "--org=ucdavis" with your own bitbucket team.
 
-Once the build is completed, log into CircleCI and add the CircleCI Private SSH Key 
-to your new project so that it can access the private repos on Bitbucket.
+Once the build is completed, log into Bitbucket and copy the public deploy key from your new repository into the ssh keys for ietwebdev/sitefarm, ietwebdev/sitefarm-theme-one, and ietwebdev/aggiefeed-drupal-module
 
-1. On your new project's GitHub page, click on the `circleci|failed` icon.
-2. Now, on your new project's CircleCI project listing, click on the settings cog.
-3. Go to "SSH Permissions", then "Add SSH Key".
-* Hostname: `bitbucket.org`
-* Private Key: [copy/paste private key from Confluence]
+**Now, you can clone down the Bitbucket repo and begin work.**
 
-Finally, click "rebuild" on the first failed CircleCI build to complete the install.
 
-Now, you can clone down the GitHub repo and begin work.
-=======
-The `require-dev` section should be used for dependencies that are not a part of the web application but are necesarry to build or test the project. Some example are `php_codesniffer` and `phpunit`. Dev dependencies will not be deployed to Pantheon.
+## Important files and directories
+
+### `/web`
+
+Pantheon will serve the site from the `/web` subdirectory due to the configuration in `pantheon.yml`. This is necessary for a Composer based workflow. Having your website in this subdirectory also allows for tests, scripts, and other files related to your project to be stored in your repo without polluting your web document root or being web accessible from Pantheon. They may still be accessible from your version control project if it is public. See [the `pantheon.yml`](https://pantheon.io/docs/pantheon-yml/#nested-docroot) documentation for details.
+
+### `/config`
+
+One of the directories moved to the git root is `/config`. This directory holds Drupal's `.yml` configuration files. In more traditional repo structure these files would live at `/sites/default/config/`. Thanks to [this line in `settings.php`](https://github.com/pantheon-systems/example-drops-8-composer/blob/54c84275cafa66c86992e5232b5e1019954e98f3/web/sites/default/settings.php#L19), the config is moved entirely outside of the web root.
+
+### `/composer.json`
+This project uses Composer to manage third-party PHP dependencies.
+
+The `require` section of `composer.json` should be used for any dependencies your web project needs, even those that might only be used on non-Live environments. All dependencies in `require` will be pushed to Pantheon. 
+
+The `require-dev` section should be used for dependencies that are not a part of the web application but are necessary to build or test the project. Some example are `php_codesniffer` and `phpunit`. Dev dependencies will not be deployed to Pantheon.
 
 If you are just browsing this repository on GitHub, you may not see some of the directories mentioned above. That is because Drupal core and contrib modules are installed via Composer and ignored in the `.gitignore` file.
 
 This project uses the following required dependencies:
->>>>>>> upstream
 
 - **composer/installers**: Relocates the installation location of certain Composer projects by type; for example, this component allows Drupal modules to be installed to the `modules` directory rather than `vendor`.
 
@@ -88,6 +73,12 @@ This project uses the following required dependencies:
 - **drupal/core-recommended**: This package contains Drupal itself, including the Drupal scaffold files.
 
 - **pantheon-systems/drupal-integrations**: This package provides additional scaffold files required to install this site on the Pantheon platform. These files do nothing if the site is deployed elsewhere.
+
+- **drush-ops/behat-drush-endpoint**: Used by Behat tests.
+
+- **rvtraveller/qs-composer-installer**: Allows a site to install quicksilver hooks from a Composer package.
+
+- **zaporylie/composer-drupal-optimizations**: This package makes `composer update` operations run more quickly when updating Drupal and Drupal's dependencies.
 
 The following optional dependencies are also included as suggestions:
 
@@ -103,25 +94,15 @@ The following optional dependencies are also included as suggestions:
 
 - **drupal/config_installer**: Allows a site to be re-installed through the Drupal web installer using existing exported configuration files.
 
-<<<<<<< HEAD
-When using this repository to manage your Drupal site, you will no longer use the Pantheon dashboard to update your Drupal version. Instead, you will manage your updates using Composer. Updates can be applied either directly on Pantheon, by using Terminus, or on your local machine. You may also place your site in Git mode, clone it locally, and then run composer commands from there.  Commit and push your files back up to Pantheon as usual.
-=======
-- **drush-ops/behat-drush-endpoint**: Used by Behat tests.
-
-- **rvtraveller/qs-composer-installer**: Allows a site to install quicksilver hooks from a Composer package.
-
-- **zaporylie/composer-drupal-optimizations**: This package makes `composer update` operations run more quickly when updating Drupal and Drupal's dependencies.
-
 Any of the optional dependencies may be removed if they are not needed or desired.
 
-### `.ci`
+### `/.ci`
 This `.ci` directory is where all of the scripts that run on Continuous Integration are stored. Provider specific configuration files, such as `.circle/config.yml` and `.gitlab-ci.yml`, make use of these scripts.
 
 The scripts are organized into subdirectories of `.ci` according to their function: `build`, `deploy`, or `test`.
 
 #### Build Scripts `.ci/build`
 Steps for building an artifact suitable for deployment. Feel free to add other build scripts here, such as installing Node dependencies, depending on your needs.
->>>>>>> upstream
 
 - `.ci/build/php` installs PHP dependencies with Composer
 
@@ -157,7 +138,6 @@ Visual regression testing uses a headless browser to take screenshots of web pag
 - `tests/behat/behat-pantheon.yml` Behat configuration file compatible with running tests against a Pantheon site
 - `tests/behat/tests/behat/features` Where Behat test files, with the `.feature` extension, should be stored. The provided example tests will need to be replaced with project specific tests.
   - `tests/behat/tests/behat/features/content.feature` A Behat test file which logs into the Drupal dashboard, creates nodes, users and terms, and verifies their existience in the Drupal admin interface and the front end of the site
-
 
 ## Updating your site
 
