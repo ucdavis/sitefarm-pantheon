@@ -58,7 +58,6 @@
         "drupal/drupal-extension": "^4.1",
         "genesis/behat-fail-aid": "^2.1",
         "squizlabs/php_codesniffer": "^3.4.0",
-        "symfony/css-selector": "^2.8",
         "rubenrua/symfony-clean-tags-composer-plugin": "^1.0"
     },
     "conflict": {
