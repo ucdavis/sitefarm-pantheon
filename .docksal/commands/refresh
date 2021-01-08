@@ -74,12 +74,13 @@ if [ $ELEMENTS = 'all' ] || [ $ELEMENTS = 'db' ]; then
       fi
     fi
 
+    drush sql:drop -y
     echo "Importing Database..."
     drush sql-cli < ${DBFILE}
     cd ${DOCROOT_PATH}
     drush cr
     drush updb -y
-    drush cim -y
+    #drush cim -y
     drush uli -l ${VIRTUAL_HOST}
 fi
 

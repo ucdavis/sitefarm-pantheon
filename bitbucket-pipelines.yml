@@ -64,20 +64,20 @@ default_steps: &default_steps
       artifacts:
         - web/**
         - vendor/**
-  - step:
-      name: Test Visual Regression
-      image: backstopjs/backstopjs:4.1.9
-      services:
-          - docker
-      caches:
-          - docker
-          - node
-      script:
-        - *bash_env_export
-        - *bash_env_source
-        - ./.ci/test/visual-regression/run
-      artifacts:
-        - backstop_data/**
+#  - step:
+#      name: Test Visual Regression
+#      image: backstopjs/backstopjs:4.1.9
+#      services:
+#          - docker
+#      caches:
+#          - docker
+#          - node
+#      script:
+#        - *bash_env_export
+#        - *bash_env_source
+#        - ./.ci/test/visual-regression/run
+#      artifacts:
+#        - backstop_data/**
   - step:
       name: Test Behat
       services:

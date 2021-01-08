@@ -51,9 +51,10 @@ fi
 echo "Waiting 10s for MySQL to initialize...";
 sleep 10
 
+# Make composer run faster
+fin composer global require hirak/prestissimo
+
 echo -e "${green_bg} Step 2 ${NC}${green} Get the code and put it in the right place.${NC}"
-#Make composer run faster
-fin exec composer global require hirak/prestissimo
 
 # Remove old directories and install
 rm -rf $PROJECT_ROOT/vendor
@@ -64,7 +65,7 @@ rm -rf $DOCROOT_PATH/libraries
 echo "Deleted: $DOCROOT_PATH/libraries"
 rm -rf $DOCROOT_PATH/modules/contrib
 echo "Deleted: $DOCROOT_PATH/modules/contrib"
-fin exec composer install
+fin composer install
 
 # Set hosts
 echo -e "${green_bg} Step 3 ${NC}${green} Configuring DNS: ${VIRTUAL_HOST} ${NC}"

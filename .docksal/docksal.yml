@@ -19,6 +19,9 @@ services:
       - MYSQL_PORT
       - VNC_PORT_MAPPING
       - COMPOSER_MEMORY_LIMIT
+      - PHP_IDE_CONFIG
+      - SYMFONY_REQUIRE
+      - COMPOSER_DEFAULT_VERSION
     volumes:
       - project_root:/var/www:rw,nocopy  # Project root volume
       - ${PROJECT_ROOT}/.docksal/etc/drush:/etc/drush:ro

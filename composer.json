@@ -45,7 +45,7 @@
         "drupal/core-recommended": "~8.8.0",
         "pantheon-systems/drupal-integrations": "^8",
         "pantheon-systems/quicksilver-pushback": "^2",
-        "drush/drush": "^8.4.5",
+        "drush/drush": "^9.0",
         "cweagans/composer-patches": "^1.7",
         "drush-ops/behat-drush-endpoint": "^9.3",
         "ucdavis/sitefarm": "dev-8.x-8.x",
@@ -112,7 +112,7 @@
                 "type:npm-asset"
             ],
             "web/modules/contrib/{$name}": ["type:drupal-module"],
-            "web/profiles/contrib/{$name}": ["type:drupal-profile"],
+            "web/profiles/{$name}": ["type:drupal-profile"],
             "web/themes/contrib/{$name}": ["type:drupal-theme"],
             "drush/Commands/contrib/{$name}": ["type:drupal-drush"],
             "web/private/scripts/quicksilver/{$name}/": ["type:quicksilver-script"]

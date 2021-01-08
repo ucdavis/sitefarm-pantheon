@@ -17,7 +17,7 @@ default:
         - Drupal\DrupalExtension\Context\DrushContext
         - FailAid\Context\FailureContext
   extensions:
-    Behat\MinkExtension:
+    Drupal\MinkExtension:
       goutte: ~
       files_path: './files'
       # base_url set by ENV
