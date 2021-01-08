@@ -23,5 +23,5 @@ git clean -fdX web
 # Lint php code for syntax errors
 composer -n lint
 
-# Check coding standards
-composer -n code-sniff
+# Check coding standards (disabled for now)
+#composer -n code-sniff
