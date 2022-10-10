@@ -1,7 +1,7 @@
 # These are yaml anchors, reused later
 x-bash-env-steps:
   - &bash_env_export export BASH_ENV="$BITBUCKET_CLONE_DIR/.bashrc"
-  - &bash_env_source source $BASH_ENV
+  - &bash_env_source source "$BASH_ENV"
 
 # This is a larger yaml anchor, reused for each pipeline
 default_steps: &default_steps
@@ -13,15 +13,15 @@ default_steps: &default_steps
           - docker
       script:
         - *bash_env_export
-        - export CI_BRANCH=${BITBUCKET_BRANCH:-master} && echo $CI_BRANCH
-        - export PR_NUMBER=$BITBUCKET_PR_ID && echo $PR_NUMBER
-        - export CI_PR_URL=https://bitbucket.org/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/pull-requests/$BITBUCKET_PR_ID && echo $CI_PR_URL
-        - export CI_BUILD_NUMBER=$BITBUCKET_BUILD_NUMBER && echo $CI_BUILD_NUMBER
-        - export CI_PROJECT_USERNAME=$BITBUCKET_REPO_OWNER && echo $CI_PROJECT_USERNAME
-        - export CI_PROJECT_REPONAME=$BITBUCKET_REPO_SLUG && echo $CI_PROJECT_REPONAME
-        - export CI_PROJECT_NAME=$BITBUCKET_REPO_FULL_NAME && echo $CI_PROJECT_NAME
+        - export CI_BRANCH="${BITBUCKET_BRANCH:-master}" && echo "$CI_BRANCH"
+        - export PR_NUMBER="$BITBUCKET_PR_ID" && echo "$PR_NUMBER"
+        - export CI_PR_URL="https://bitbucket.org/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/pull-requests/$BITBUCKET_PR_ID" && echo "$CI_PR_URL"
+        - export CI_BUILD_NUMBER="$BITBUCKET_BUILD_NUMBER" && echo "$CI_BUILD_NUMBER"
+        - export CI_PROJECT_USERNAME="$BITBUCKET_REPO_OWNER" && echo "$CI_PROJECT_USERNAME"
+        - export CI_PROJECT_REPONAME="$BITBUCKET_REPO_SLUG" && echo "$CI_PROJECT_REPONAME"
+        - export CI_PROJECT_NAME="$BITBUCKET_REPO_FULL_NAME" && echo "$CI_PROJECT_NAME"
         - /build-tools-ci/scripts/set-environment
-        - echo $TERMINUS_ENV
+        - echo "$TERMINUS_ENV"
       artifacts:
         - .bashrc
   - parallel:
@@ -121,11 +121,11 @@ pipelines:
           - docker
           - composer
         script:
-          - export CI_BRANCH=${BITBUCKET_BRANCH:-master} && echo $CI_BRANCH
-          - export CI_BUILD_NUMBER=$BITBUCKET_BUILD_NUMBER && echo $CI_BUILD_NUMBER
-          - export CI_PROJECT_USERNAME=$BITBUCKET_REPO_OWNER && echo $CI_PROJECT_USERNAME
-          - export CI_PROJECT_REPONAME=$BITBUCKET_REPO_SLUG && echo $CI_PROJECT_REPONAME
-          - export CI_PROJECT_NAME=$BITBUCKET_REPO_FULL_NAME && echo $CI_PROJECT_NAME
+          - export CI_BRANCH="${BITBUCKET_BRANCH:-master}" && echo "$CI_BRANCH"
+          - export CI_BUILD_NUMBER="$BITBUCKET_BUILD_NUMBER" && echo "$CI_BUILD_NUMBER"
+          - export CI_PROJECT_USERNAME="$BITBUCKET_REPO_OWNER" && echo "$CI_PROJECT_USERNAME"
+          - export CI_PROJECT_REPONAME="$BITBUCKET_REPO_SLUG" && echo "$CI_PROJECT_REPONAME"
+          - export CI_PROJECT_NAME="$BITBUCKET_REPO_FULL_NAME" && echo "$CI_PROJECT_NAME"
           - /build-tools-ci/scripts/set-environment
           - terminus -n auth:login --machine-token="$TERMINUS_TOKEN"
-          - set -e && terminus project:clu $TERMINUS_SITE
+          - set -e && terminus project:clu "$TERMINUS_SITE"
